@@ -46,13 +46,10 @@ if len(comps_filtered) != 0:
 
     comp = requests.get(f"https://limitless-coast-08153.herokuapp.com/companies/{comp}")
     comp = comp.json()['data']
-
-    st.markdown(f"""
-    ## Company Profile
-    ### {comp['name']}
-    **HQ**: {comp['category']}  
-    **Founded**: {comp['founded']}  
-    **Funding**: {comp['funding']}  
-    **Description**: {comp['description']}  
-    **Website**: {comp['website']}
-    """)
+    st.markdown(f"## Company Profile")
+    st.markdown(f"### {comp['name']}")
+    st.markdown(f"**HQ**: {comp['category']}  ")
+    st.markdown(f"**Founded**: {comp['founded']}  ")
+    st.markdown(f"**Funding**: {comp['funding']}  ")
+    st.markdown(f"**Description**: {comp['description']} ")
+    st.markdown(f"**Website**: {comp['website']}")
