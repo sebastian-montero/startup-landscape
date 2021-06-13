@@ -2,8 +2,7 @@ from pandas._config.config import describe_option
 import requests
 import streamlit as st
 import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
+
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
