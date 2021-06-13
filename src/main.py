@@ -7,59 +7,53 @@ import matplotlib.pyplot as plt
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-
-# load data
-comps = pd.read_csv("data/comps.csv")
-tags = pd.read_csv("data/tags.csv")
-countries = pd.read_csv("data/countries.csv")
-
 # NAVBAR
 
-start = st.sidebar.button('Start the app')
-
+# start = st.sidebar.button('Start the app')
 
 with st.sidebar.form(key='filters'):
     # Load country list
-    country_selection = st.multiselect('Country', countries['country'])
+    countries = requests.get("https://limitless-coast-08153.herokuapp.com/variables/countries")
+    countries =countries.json()['data']
+
+    country_selection = st.multiselect('Country', countries)
 
     # Load tag list
-    tag_selection = st.multiselect('Tags', tags['tags'])
+    tags = requests.get("https://limitless-coast-08153.herokuapp.com/variables/tags")
+    tags =tags.json()['data']
+    tag_selection = st.multiselect('Tags', tags)
 
     # Submit API
     submitted = st.form_submit_button("Submit")
 
 st.markdown("# Startup Analytics")
-
+st.markdown("The Startup Analytics website is a data web app that allows anyone to find European startups. This app relies in the data of the [EU-Startups](https://www.eu-startups.com/directory/) website and makes it easier to find startups in the hottest topics across different European countries.")
+st.markdown("To start, just filter for the topic of interest and for the country. Either of these search fields can be left blank so show all companies.")
 # COMPANY LIST
-st.markdown("## Companies")
-comps_filtered = comps[comps['country'].isin(country_selection)]
-st.dataframe(data=comps_filtered.head(50), width=1000)
+data = {'countries': country_selection, "tags":tag_selection}
+comps = requests.post("https://limitless-coast-08153.herokuapp.com/companies", json = data)
+comps_filtered = pd.DataFrame(eval(comps.json()))
+
 
 if len(comps_filtered) != 0:
+    st.markdown("## Companies")
+    st.dataframe(data=comps_filtered.drop(['website','tags'],axis=1))
+    st.markdown(f"#### Total number of results: {len(comps_filtered)}")
+
     with st.sidebar.form(key='comp_sel'):
-        comp = st.selectbox('Select Company', comps_filtered['company'])
-        hide_df = st.radio("Hide table?", ["Yes", "No"])
-        # submitted = True
+        comp = st.selectbox('Select Company', comps_filtered['name'])
         submitted2 = st.form_submit_button("Submit")
 
-# Select company
-name = comps[comps['company'] == comp]['company'].iloc[0]
-desc = comps[comps['company'] == comp]['description'].iloc[0]
-founded = comps[comps['company'] == comp]['year founded'].iloc[0]
-country = comps[comps['company'] == comp]['country'].iloc[0]
 
-col1, col2 = st.beta_columns(2)
-with col1:
+    comp = requests.get(f"https://limitless-coast-08153.herokuapp.com/companies/{comp}")
+    comp = comp.json()['data']
+
     st.markdown(f"""
-    ## {name}
-    **HQ**: {country}  
-    **Founded**: {founded}  
-    **Description**: {desc}
-    **Website**: xxxx
+    ## Company Profile
+    ### {comp['name']}
+    **HQ**: {comp['category']}  
+    **Founded**: {comp['founded']}  
+    **Funding**: {comp['funding']}  
+    **Description**: {comp['description']}  
+    **Website**: {comp['website']}
     """)
-with col2:
-    G = nx.Graph()
-    G.add_edge(1, 2)
-    G.add_edge(1, 3)
-    graph = nx.draw(G, with_labels=True)
-    st.pyplot(graph)
